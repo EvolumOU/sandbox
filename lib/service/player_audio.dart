@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
 enum PlayerAudioState {
   loading,
@@ -13,8 +14,16 @@ class PlayerAudio {
 
   Future<void> init() async {
     try {
-      duration =
-          await player.setAsset("assets/audio/imperial.mp3") ?? Duration.zero;
+      final audioSource =
+          AudioSource.uri(Uri.parse("asset:///assets/audio/imperial.mp3"),
+              tag: MediaItem(
+                id: '1',
+                title: 'Test',
+                album: 'Evolum',
+                artUri: Uri.parse(
+                    'https://firebasestorage.googleapis.com/v0/b/evolum-936c6.appspot.com/o/drawing%2Fsmall%2Fblack%2Fawareness.png?alt=media&token=71cc8fb0-7e36-4019-afd3-4046da653187'),
+              ));
+      duration = await player.setAudioSource(audioSource) ?? Duration.zero;
     } catch (e) {
       print("[PlayerAudio] init error: $e");
     }
