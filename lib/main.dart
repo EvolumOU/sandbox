@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:evolum_package/main.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:sandbox/presentation/audio_player/audio_player.dart';
 
@@ -7,6 +8,7 @@ Future<void> main() async {
     androidNotificationChannelId: 'com.example.sandbox',
     androidNotificationChannelName: 'Audio playback',
     androidNotificationOngoing: true,
+    notificationColor: kevoOrange,
   );
   runApp(const MyApp());
 }

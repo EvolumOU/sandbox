@@ -1,6 +1,9 @@
-// ignore_for_file: avoid_print
+import 'dart:io';
+
+import 'package:evolum_package/model/utils.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:sandbox/service/storage.dart';
 
 enum PlayerAudioState {
   loading,
@@ -8,21 +11,41 @@ enum PlayerAudioState {
   finished,
 }
 
+/// Both
 class PlayerAudio {
+  /// AudioSource audio title
+  final String title;
+
+  /// If null, [audioFile] can't be null.
+  final String? audioUrl;
+
+  /// If null, [audioUrl] can't be null.
+  final File? audioFile;
+
   AudioPlayer player = AudioPlayer();
   Duration duration = Duration.zero;
 
+  PlayerAudio({required this.title, this.audioUrl, this.audioFile});
+
   Future<void> init() async {
+    assert(audioUrl != null || audioFile != null);
+
+    String? url = audioUrl;
+
     try {
-      final audioSource =
-          AudioSource.uri(Uri.parse("asset:///assets/audio/imperial.mp3"),
-              tag: MediaItem(
-                id: '1',
-                title: 'Test',
-                album: 'Evolum',
-                artUri: Uri.parse(
-                    'https://firebasestorage.googleapis.com/v0/b/evolum-936c6.appspot.com/o/drawing%2Fsmall%2Fblack%2Fawareness.png?alt=media&token=71cc8fb0-7e36-4019-afd3-4046da653187'),
-              ));
+      if (url != null && url.startsWith("gs://")) {
+        url = await Storage.getDownloadUrl(url);
+      }
+      final audioSource = AudioSource.uri(
+        url != null ? Uri.parse(url) : Uri.file(audioFile!.path),
+        tag: MediaItem(
+          id: getRandomGeneratedId(),
+          title: title,
+          album: 'evolum',
+          artUri: Uri.parse(
+              "https://firebasestorage.googleapis.com/v0/b/evolum-936c6.appspot.com/o/logo%2Fevolum.png?alt=media&token=84a76461-716d-453c-a9d5-ecec85dfbb81"),
+        ),
+      );
       duration = await player.setAudioSource(audioSource) ?? Duration.zero;
     } catch (e) {
       print("[PlayerAudio] init error: $e");

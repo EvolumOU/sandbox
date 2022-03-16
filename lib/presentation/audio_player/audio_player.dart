@@ -1,19 +1,8 @@
-// ignore_for_file: avoid_print
-
 import 'package:evolum_package/main.dart';
 import 'package:flutter/material.dart';
 import 'package:sandbox/presentation/audio_player/widget/controls_button.dart';
 import 'package:sandbox/presentation/audio_player/widget/slider.dart';
 import 'package:sandbox/service/player_audio.dart';
-
-class name extends StatelessWidget {
-  const name({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
 
 class SandboxAudioPlayer extends StatefulWidget {
   final Function() onFinish;
@@ -26,7 +15,11 @@ class SandboxAudioPlayer extends StatefulWidget {
 }
 
 class _SandboxAudioPlayerState extends State<SandboxAudioPlayer> {
-  final player = PlayerAudio();
+  final player = PlayerAudio(
+    title: 'The Imperial March',
+    audioUrl:
+        'https://firebasestorage.googleapis.com/v0/b/evolum-936c6.appspot.com/o/Get_Lucky.mp3?alt=media&token=4b0da820-c4c6-4de5-a395-9be99e8c3197',
+  );
   bool isLoading = true;
 
   Future<void> initPlayerAudio() async {

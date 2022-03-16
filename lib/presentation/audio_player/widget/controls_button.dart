@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:sandbox/service/player_audio.dart';
 
 class SandboxAudioPlayerControlsButton extends StatefulWidget {
