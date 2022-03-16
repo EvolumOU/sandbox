@@ -30,11 +30,12 @@ class PlayerAudio {
     required this.title,
     this.audioUrl,
     this.audioFile,
-    this.loop = true,
+    this.loop = false,
   });
 
   AudioPlayer player = AudioPlayer();
   Duration duration = Duration.zero;
+  bool isEvoDone = false;
 
   Future<void> init() async {
     assert(audioUrl != null || audioFile != null);
@@ -62,8 +63,14 @@ class PlayerAudio {
     }
   }
 
-  Stream<Duration> get positionStream =>
-      player.positionStream.map((e) => e < duration ? e : duration);
+  void backgroundEvent(Duration e) {
+    if (!isEvoDone && e >= duration * 0.8) print("[PlayerAudio] evo done");
+  }
+
+  Stream<Duration> get positionStream => player.positionStream.map((e) {
+        backgroundEvent(e);
+        return e < duration ? e : duration;
+      });
   Stream<bool> get playingStream => player.playingStream;
 
   Stream<PlayerAudioState> get playerStateStream {
