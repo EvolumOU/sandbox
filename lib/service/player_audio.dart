@@ -11,7 +11,8 @@ enum PlayerAudioState {
   finished,
 }
 
-/// Both
+/// PlayerAudio
+/// The [audioFile] and [audioUrl] paramenters can't be both null.
 class PlayerAudio {
   /// AudioSource audio title
   final String title;
@@ -22,10 +23,18 @@ class PlayerAudio {
   /// If null, [audioUrl] can't be null.
   final File? audioFile;
 
+  /// Wether the audio is repeating itself or not. False by default.
+  final bool loop;
+
+  PlayerAudio({
+    required this.title,
+    this.audioUrl,
+    this.audioFile,
+    this.loop = true,
+  });
+
   AudioPlayer player = AudioPlayer();
   Duration duration = Duration.zero;
-
-  PlayerAudio({required this.title, this.audioUrl, this.audioFile});
 
   Future<void> init() async {
     assert(audioUrl != null || audioFile != null);
@@ -47,6 +56,7 @@ class PlayerAudio {
         ),
       );
       duration = await player.setAudioSource(audioSource) ?? Duration.zero;
+      if (loop) player.setLoopMode(LoopMode.all);
     } catch (e) {
       print("[PlayerAudio] init error: $e");
     }
@@ -82,4 +92,11 @@ class PlayerAudio {
   }
 
   Future<void> seek(Duration to) async => await player.seek(to);
+
+  Future<void> quickSeek(int seconds) async {
+    Duration to = player.position + Duration(seconds: seconds);
+
+    if (to.isNegative) to = Duration.zero;
+    await player.seek(to);
+  }
 }

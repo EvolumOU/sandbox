@@ -6,15 +6,19 @@ class SandboxAudioPlayerControlsButton extends StatefulWidget {
   final Stream<bool> playingStream;
   final Function() play;
   final Function() pause;
+  final Function(int) quickSeek;
   final Function() onFinish;
+  final int seconds;
 
   const SandboxAudioPlayerControlsButton({
     Key? key,
     required this.playerStateStream,
     required this.playingStream,
     required this.onFinish,
+    required this.quickSeek,
     required this.play,
     required this.pause,
+    this.seconds = 10,
   }) : super(key: key);
 
   @override
@@ -49,15 +53,28 @@ class _SandboxAudioPlayerControlsButtonState
           final isPlaying = snapshot.data;
 
           if (isPlaying == null) return const SizedBox();
-          return isPlaying
-              ? IconButton(
-                  onPressed: widget.pause,
-                  icon: const Icon(Icons.pause),
-                )
-              : IconButton(
-                  onPressed: widget.play,
-                  icon: const Icon(Icons.play_arrow),
-                );
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: () => widget.quickSeek(-10),
+                icon: const Icon(Icons.history),
+              ),
+              isPlaying
+                  ? IconButton(
+                      onPressed: widget.pause,
+                      icon: const Icon(Icons.pause),
+                    )
+                  : IconButton(
+                      onPressed: widget.play,
+                      icon: const Icon(Icons.play_arrow),
+                    ),
+              IconButton(
+                onPressed: () => widget.quickSeek(10),
+                icon: const Icon(Icons.update),
+              ),
+            ],
+          );
         },
       ),
     );

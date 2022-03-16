@@ -37,7 +37,7 @@ class _SandboxAudioPlayerState extends State<SandboxAudioPlayer> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: isLoading
-          ? const EvoLoading()
+          ? const Center(child: EvoLoading())
           : Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -48,6 +48,7 @@ class _SandboxAudioPlayerState extends State<SandboxAudioPlayer> {
                   playingStream: player.playingStream,
                   play: player.play,
                   pause: player.pause,
+                  quickSeek: (seconds) => player.quickSeek(seconds),
                   onFinish: () => print("AUDIO IS FINISHED"),
                 ),
                 if (player.duration != Duration.zero)
