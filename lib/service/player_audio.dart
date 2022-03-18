@@ -26,16 +26,23 @@ class PlayerAudio {
   /// Wether the audio is repeating itself or not. False by default.
   final bool loop;
 
+  /// Callback in order to send errors
+  final Function(String)? onError;
+
   PlayerAudio({
     required this.title,
     this.audioUrl,
     this.audioFile,
     this.loop = false,
+    this.onError,
   });
 
   AudioPlayer player = AudioPlayer();
   Duration duration = Duration.zero;
   bool isEvoDone = false;
+
+  bool get isFinished =>
+      player.playerState.processingState == ProcessingState.completed;
 
   Future<void> init() async {
     assert(audioUrl != null || audioFile != null);
@@ -59,7 +66,7 @@ class PlayerAudio {
       duration = await player.setAudioSource(audioSource) ?? Duration.zero;
       if (loop) player.setLoopMode(LoopMode.all);
     } catch (e) {
-      print("[PlayerAudio] init error: $e");
+      onError?.call(e.toString());
     }
   }
 
