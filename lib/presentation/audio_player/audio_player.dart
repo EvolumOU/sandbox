@@ -14,7 +14,8 @@ class SandboxAudioPlayer extends StatefulWidget {
   State<SandboxAudioPlayer> createState() => _SandboxAudioPlayerState();
 }
 
-class _SandboxAudioPlayerState extends State<SandboxAudioPlayer> {
+class _SandboxAudioPlayerState extends State<SandboxAudioPlayer>
+    with WidgetsBindingObserver {
   final player = PlayerAudio(
     title: 'The Imperial March',
     audioUrl:
@@ -28,7 +29,16 @@ class _SandboxAudioPlayerState extends State<SandboxAudioPlayer> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // when app is back on foreground and audio is finished
+    if (state == AppLifecycleState.resumed && player.isFinished) {
+      widget.onFinish();
+    }
+  }
+
+  @override
   void initState() {
+    WidgetsBinding.instance?.addObserver(this);
     initPlayerAudio();
     super.initState();
   }
@@ -69,6 +79,7 @@ class _SandboxAudioPlayerState extends State<SandboxAudioPlayer> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance?.removeObserver(this);
     player.stop();
     super.dispose();
   }
