@@ -66,12 +66,16 @@ class PlayerAudio {
       duration = await player.setAudioSource(audioSource) ?? Duration.zero;
       if (loop) player.setLoopMode(LoopMode.all);
     } catch (e) {
+      // TODO: Sentry error log
       onError?.call(e.toString());
     }
   }
 
   void backgroundEvent(Duration e) {
-    if (!isEvoDone && e >= duration * 0.8) print("[PlayerAudio] evo done");
+    if (!isEvoDone && e >= duration * 0.8) {
+      print("[PlayerAudio] evo done");
+      isEvoDone = true;
+    }
   }
 
   Stream<Duration> get positionStream => player.positionStream.map((e) {
