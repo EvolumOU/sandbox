@@ -18,6 +18,7 @@ class _SandboxAudioPlayerState extends State<SandboxAudioPlayer>
     with WidgetsBindingObserver {
   final player = PlayerAudio(
     title: 'The Imperial March',
+    loop: true,
     audioUrl:
         'https://firebasestorage.googleapis.com/v0/b/evolum-936c6.appspot.com/o/Get_Lucky.mp3?alt=media&token=4b0da820-c4c6-4de5-a395-9be99e8c3197',
   );

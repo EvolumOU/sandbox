@@ -39,10 +39,31 @@ class PlayerAudio {
 
   AudioPlayer player = AudioPlayer();
   Duration duration = Duration.zero;
-  bool isEvoDone = false;
+  int cycleCount = 0;
+  bool isAudioDone = false;
 
   bool get isFinished =>
       player.playerState.processingState == ProcessingState.completed;
+
+  Stream<Duration> get positionStream =>
+      player.positionStream.map((e) => e < duration ? e : duration);
+
+  Stream<bool> get playingStream => player.playingStream;
+
+  Stream<PlayerAudioState> get playerStateStream {
+    return player.playerStateStream.map((e) {
+      switch (e.processingState) {
+        case ProcessingState.idle:
+        case ProcessingState.loading:
+        case ProcessingState.buffering:
+          return PlayerAudioState.loading;
+        case ProcessingState.ready:
+          return PlayerAudioState.ready;
+        case ProcessingState.completed:
+          return PlayerAudioState.finished;
+      }
+    });
+  }
 
   Future<void> init() async {
     assert(audioUrl != null || audioFile != null);
@@ -65,38 +86,29 @@ class PlayerAudio {
       );
       duration = await player.setAudioSource(audioSource) ?? Duration.zero;
       if (loop) player.setLoopMode(LoopMode.all);
+      player.positionStream.listen(backgroundEvent);
     } catch (e) {
-      // TODO: Sentry error log
       onError?.call(e.toString());
     }
   }
 
   void backgroundEvent(Duration e) {
-    if (!isEvoDone && e >= duration * 0.8) {
-      print("[PlayerAudio] evo done");
-      isEvoDone = true;
-    }
-  }
+    final totalSeconds = (cycleCount * duration.inSeconds) + e.inSeconds;
 
-  Stream<Duration> get positionStream => player.positionStream.map((e) {
-        backgroundEvent(e);
-        return e < duration ? e : duration;
-      });
-  Stream<bool> get playingStream => player.playingStream;
-
-  Stream<PlayerAudioState> get playerStateStream {
-    return player.playerStateStream.map((e) {
-      switch (e.processingState) {
-        case ProcessingState.idle:
-        case ProcessingState.loading:
-        case ProcessingState.buffering:
-          return PlayerAudioState.loading;
-        case ProcessingState.ready:
-          return PlayerAudioState.ready;
-        case ProcessingState.completed:
-          return PlayerAudioState.finished;
+    if (loop) {
+      if (e >= duration) {
+        cycleCount++;
       }
-    });
+      if (!isAudioDone && totalSeconds >= 120) {
+        print("[PlayerAudio] audio done (120 seconds)");
+        isAudioDone = true;
+      }
+    } else {
+      if (!isAudioDone && e >= duration * 0.8) {
+        print("[PlayerAudio] audio done (80%)");
+        isAudioDone = true;
+      }
+    }
   }
 
   Future<void> play() async => await player.play();
