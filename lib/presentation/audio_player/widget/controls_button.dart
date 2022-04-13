@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sandbox/main.dart';
 import 'package:sandbox/service/player_audio.dart';
 
 class SandboxAudioPlayerControlsButton extends StatefulWidget {
@@ -66,7 +67,7 @@ class _SandboxAudioPlayerControlsButtonState
                       icon: const Icon(Icons.pause),
                     )
                   : IconButton(
-                      onPressed: widget.play,
+                      onPressed: audioHandler.play,
                       icon: const Icon(Icons.play_arrow),
                     ),
               IconButton(

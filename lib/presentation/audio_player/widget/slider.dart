@@ -22,7 +22,6 @@ class SandboxAudioPlayerSlider extends StatelessWidget {
         if (position == null) {
           return const SizedBox();
         }
-
         return Slider(
           value: position.inMilliseconds / duration.inMilliseconds,
           onChanged: (pos) => onChanged(pos),

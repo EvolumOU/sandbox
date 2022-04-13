@@ -1,8 +1,6 @@
 import 'dart:io';
-
-import 'package:evolum_package/model/utils.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 import 'package:sandbox/service/storage.dart';
 
 enum PlayerAudioState {
@@ -11,34 +9,10 @@ enum PlayerAudioState {
   finished,
 }
 
-/// PlayerAudio
-/// The [audioFile] and [audioUrl] paramenters can't be both null.
-class PlayerAudio {
-  /// AudioSource audio title
-  final String title;
-
-  /// If null, [audioFile] can't be null.
-  final String? audioUrl;
-
-  /// If null, [audioUrl] can't be null.
-  final File? audioFile;
-
-  /// Wether the audio is repeating itself or not. False by default.
-  final bool loop;
-
-  /// Callback in order to send errors
-  final Function(String)? onError;
-
-  PlayerAudio({
-    required this.title,
-    this.audioUrl,
-    this.audioFile,
-    this.loop = false,
-    this.onError,
-  });
-
+class AudioPlayerHandler extends BaseAudioHandler with SeekHandler {
   AudioPlayer player = AudioPlayer();
   Duration duration = Duration.zero;
+  late bool loopMode;
   int cycleCount = 0;
   bool isAudioDone = false;
 
@@ -65,25 +39,40 @@ class PlayerAudio {
     });
   }
 
-  Future<void> init() async {
+  AudioPlayerHandler() {
+    player.playbackEventStream.map(transformEvent).pipe(playbackState);
+  }
+
+  Future<void> init({
+    required String title,
+    String? audioUrl,
+    File? audioFile,
+    bool loop = false,
+    Function(String)? onError,
+  }) async {
     assert(audioUrl != null || audioFile != null);
 
     String? url = audioUrl;
+    loopMode = loop;
 
     try {
       if (url != null && url.startsWith("gs://")) {
         url = await Storage.getDownloadUrl(url);
       }
+
+      final item = MediaItem(
+        id: url ?? audioFile!.path,
+        title: title,
+        album: 'evolum',
+        artUri: Uri.parse(
+            "https://firebasestorage.googleapis.com/v0/b/evolum-936c6.appspot.com/o/logo%2Fevolum.png?alt=media&token=84a76461-716d-453c-a9d5-ecec85dfbb81"),
+      );
+      mediaItem.add(item);
+
       final audioSource = AudioSource.uri(
         url != null ? Uri.parse(url) : Uri.file(audioFile!.path),
-        tag: MediaItem(
-          id: getRandomGeneratedId(),
-          title: title,
-          album: 'evolum',
-          artUri: Uri.parse(
-              "https://firebasestorage.googleapis.com/v0/b/evolum-936c6.appspot.com/o/logo%2Fevolum.png?alt=media&token=84a76461-716d-453c-a9d5-ecec85dfbb81"),
-        ),
       );
+
       duration = await player.setAudioSource(audioSource) ?? Duration.zero;
       if (loop) player.setLoopMode(LoopMode.all);
       player.positionStream.listen(backgroundEvent);
@@ -95,7 +84,7 @@ class PlayerAudio {
   void backgroundEvent(Duration e) {
     final totalSeconds = (cycleCount * duration.inSeconds) + e.inSeconds;
 
-    if (loop) {
+    if (loopMode) {
       if (e >= duration) {
         cycleCount++;
       }
@@ -111,22 +100,44 @@ class PlayerAudio {
     }
   }
 
+  @override
   Future<void> play() async => await player.play();
+
+  @override
   Future<void> pause() async => await player.pause();
 
   Future<void> playOrPause() => player.playing ? pause() : play();
-
-  Future<void> stop() async {
-    await player.stop();
-    await player.dispose();
-  }
-
-  Future<void> seek(Duration to) async => await player.seek(to);
 
   Future<void> quickSeek(int seconds) async {
     Duration to = player.position + Duration(seconds: seconds);
 
     if (to.isNegative) to = Duration.zero;
     await player.seek(to);
+  }
+
+  PlaybackState transformEvent(PlaybackEvent event) {
+    return PlaybackState(
+      controls: [
+        if (player.playing) MediaControl.pause else MediaControl.play,
+      ],
+      systemActions: const {
+        // MediaAction.seek,
+        // MediaAction.seekForward,
+        // MediaAction.seekBackward,
+      },
+      androidCompactActionIndices: const [0],
+      processingState: const {
+        ProcessingState.idle: AudioProcessingState.idle,
+        ProcessingState.loading: AudioProcessingState.loading,
+        ProcessingState.buffering: AudioProcessingState.buffering,
+        ProcessingState.ready: AudioProcessingState.ready,
+        ProcessingState.completed: AudioProcessingState.completed,
+      }[player.processingState]!,
+      playing: player.playing,
+      updatePosition: player.position,
+      bufferedPosition: player.bufferedPosition,
+      speed: player.speed,
+      queueIndex: event.currentIndex,
+    );
   }
 }
