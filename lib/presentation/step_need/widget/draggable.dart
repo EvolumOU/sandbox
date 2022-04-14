@@ -46,7 +46,7 @@ class _RitualNeedStepDraggableState extends State<RitualNeedStepDraggable> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: (width / widget.needs.length).floorToDouble(),
+            width: width / widget.needs.length,
             height: 20,
             color: Colors.transparent,
             child: const CustomPaint(

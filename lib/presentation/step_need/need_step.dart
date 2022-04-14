@@ -59,7 +59,7 @@ class _RitualNeedStepState extends State<RitualNeedStep> {
   Widget build(BuildContext context) {
     final ticketHeaderHeight =
         (MediaQuery.of(context).size.height * 0.35).ceilToDouble();
-    final ticketHeight = (ticketHeaderHeight * 0.7).ceilToDouble();
+    final ticketBodyHeight = (ticketHeaderHeight * 0.7).ceilToDouble();
     const double padding = 40;
 
     return Listener(
@@ -90,7 +90,7 @@ class _RitualNeedStepState extends State<RitualNeedStep> {
                         height: ticketHeaderHeight,
                       ),
                       SizedBox(
-                        height: ticketHeight,
+                        height: ticketBodyHeight,
                         child: ListView.builder(
                           itemCount: needs.length,
                           scrollDirection: Axis.horizontal,
@@ -99,7 +99,7 @@ class _RitualNeedStepState extends State<RitualNeedStep> {
                             index: index,
                             needs: needs,
                             padding: padding,
-                            height: ticketHeight,
+                            height: ticketBodyHeight,
                             draggingBeforeLast: draggingBeforeLast,
                             onDrag: dragTicket,
                           ),
