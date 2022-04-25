@@ -1,7 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:evolum_package/main.dart';
 import 'package:flutter/material.dart';
-import 'package:sandbox/presentation/step_need/need_step.dart';
+import 'package:sandbox/presentation/oracle/oracle.dart';
 import 'package:sandbox/service/player_audio.dart';
 
 late AudioHandler audioHandler;
@@ -37,10 +37,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       // home: SandboxAudioPlayer(onFinish: () => print("FINISH")),
-      home: RitualNeedStep(
-        onSelect: (_) {},
-        onFinish: () {},
-      ),
+      home: const OracleScreen(),
     );
   }
 }
